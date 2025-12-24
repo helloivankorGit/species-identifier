@@ -3,13 +3,15 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { LanguageProvider } from '@/contexts/language-context';
+import { ThemeModeProvider } from '@/contexts/theme-mode-context';
+import { useColorScheme } from 'react-native';
 
 export const unstable_settings = {
   anchor: '(tabs)',
 };
 
-export default function RootLayout() {
+function RootLayoutContent() {
   const colorScheme = useColorScheme();
 
   return (
@@ -20,5 +22,15 @@ export default function RootLayout() {
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <LanguageProvider>
+      <ThemeModeProvider>
+        <RootLayoutContent />
+      </ThemeModeProvider>
+    </LanguageProvider>
   );
 }

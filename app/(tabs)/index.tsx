@@ -1,98 +1,191 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
+import { AnimalIcon } from '@/components/animal-icon';
+import { IdentificationResultComponent } from '@/components/identification-result';
+import { ImagePickerButton } from '@/components/image-picker-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { useLanguage } from '@/contexts/language-context';
+import { useThemeColor } from '@/hooks/use-theme-color';
+import { IdentificationResult, identifyAnimalOrInsect } from '@/services/identifier';
+import { Image } from 'expo-image';
+import { useState } from 'react';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, View } from 'react-native';
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState<IdentificationResult | null>(null);
+  const tintColor = useThemeColor({}, 'tint');
+  const { t, language } = useLanguage();
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  const handleImageSelected = async (uri: string) => {
+    setSelectedImage(uri);
+    setResult(null);
+    setIsLoading(true);
+
+    try {
+      const identification = await identifyAnimalOrInsect(uri, language);
+      if (identification) {
+        setResult(identification);
+      } else {
+        Alert.alert(
+          t('identificationFailed'),
+          t('identificationFailedMessage')
+        );
+        setSelectedImage(null);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      Alert.alert(
+        t('errorOccurred'),
+        'An error occurred while identifying the image. Please make sure you have added your Google AI API key in services/identifier.ts'
+      );
+      setSelectedImage(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <ThemedView style={styles.container}>
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <ThemedView style={styles.header}>
+          <AnimalIcon size={64} color={tintColor} />
+          <ThemedText type="title" style={styles.title}>
+            {t('appTitle')}
+          </ThemedText>
+          <ThemedText style={styles.subtitle}>
+            {t('appSubtitle')}
+          </ThemedText>
+        </ThemedView>
+
+        {!selectedImage && !result && (
+          <ThemedView style={styles.pickerContainer}>
+            <View style={styles.buttonRow}>
+              <ImagePickerButton
+                onImageSelected={handleImageSelected}
+                icon="camera"
+                label={t('takePhoto')}
+              />
+              <ImagePickerButton
+                onImageSelected={handleImageSelected}
+                icon="images"
+                label={t('chooseFromLibrary')}
+              />
+            </View>
+          </ThemedView>
+        )}
+
+        {selectedImage && (
+          <ThemedView style={styles.imageContainer}>
+            <Image source={{ uri: selectedImage }} style={styles.image} contentFit="cover" />
+          </ThemedView>
+        )}
+
+        {isLoading && (
+          <ThemedView style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={tintColor} />
+            <ThemedText style={styles.loadingText}>
+              {t('analyzingImage')}
+            </ThemedText>
+          </ThemedView>
+        )}
+
+        {result && !isLoading && (
+          <ThemedView style={styles.resultContainer}>
+            <IdentificationResultComponent result={result} />
+            <ThemedView style={styles.resetButtonContainer}>
+              <View style={styles.buttonRow}>
+                <ImagePickerButton
+                  onImageSelected={handleImageSelected}
+                  icon="camera"
+                  label={t('newPhoto')}
+                />
+                <ImagePickerButton
+                  onImageSelected={handleImageSelected}
+                  icon="images"
+                  label={t('newFromLibrary')}
+                />
+              </View>
+            </ThemedView>
+          </ThemedView>
+        )}
+      </ScrollView>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  container: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: 15,
+  },
+  header: {
     alignItems: 'center',
-    gap: 8,
+    marginBottom: 48,
+    marginTop: 32,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  title: {
+    marginTop: 20,
+    marginBottom: 12,
+    textAlign: 'center',
+    fontSize: 28,
+    fontWeight: '700',
+    letterSpacing: -0.5,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  subtitle: {
+    textAlign: 'center',
+    opacity: 0.6,
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  pickerContainer: {
+    marginBottom: 32,
+  },
+  buttonRow: {
+    gap: 16,
+  },
+  imageContainer: {
+    marginBottom: 32,
+    borderRadius: 24,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  image: {
+    width: '100%',
+    height: 340,
+    borderRadius: 24,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 48,
+  },
+  loadingText: {
+    marginTop: 20,
+    fontSize: 16,
+    fontWeight: '500',
+    opacity: 0.7,
+  },
+  resultContainer: {
+    marginBottom: 32,
+  },
+  resetButtonContainer: {
+    marginTop: 32,
+    paddingTop: 32,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.08)',
   },
 });
