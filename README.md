@@ -28,10 +28,16 @@ A beautiful, bilingual React Native application that uses Google's Gemini AI to 
 
 <table>
   <tr>
-    <td><img src="screenshots/homepage.png" width="200"/></td>
-    <td><img src="screenshots/success-result.png" width="200"/></td>
-    <td><img src="screenshots/error-result.png" width="200"/></td>
-    <td><img src="screenshots/explore-page.png" width="200"/></td>
+    <td><img width="323" height="703" alt="home" src="https://github.com/user-attachments/assets/b1bb324e-4d1e-4335-8acf-4a4b51efc952" /></td>
+    <td>
+      <img width="323" height="703" alt="success" src="https://github.com/user-attachments/assets/a0593a18-6f3f-4896-bdd6-c7bf19fb0061" />
+    </td>
+    <td>
+      <img width="323" height="703" alt="error" src="https://github.com/user-attachments/assets/7537aa2f-d633-40b8-9110-c6f5060bef6a" />
+    </td>
+    <td>
+      <img width="323" height="703" alt="explor" src="https://github.com/user-attachments/assets/58310de1-57ff-4aec-8143-67b01cc4ce9c" />
+    </td>
   </tr>
   <tr>
     <td align="center"><b>Home Screen</b><br/>Main identifier interface</td>
@@ -57,7 +63,7 @@ A beautiful, bilingual React Native application that uses Google's Gemini AI to 
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/species-identifier.git
+   git clone https://github.com/helloivankorGit/species-identifier.git
    cd species-identifier
    ```
 
@@ -212,12 +218,7 @@ For better security, you can use environment variables:
    GOOGLE_AI_API_KEY=your_api_key_here
    ```
 
-2. Update `services/identifier.ts`:
-   ```typescript
-   const API_KEY = process.env.GOOGLE_AI_API_KEY || 'fallback_key';
-   ```
-
-3. Add to `.gitignore`:
+2. Add to `.gitignore`:
    ```
    .env
    ```
@@ -395,9 +396,9 @@ Permission is hereby granted, free of charge, to any person obtaining a copy...
 
 ## 📧 Support
 
-- 🐛 **Bug Reports:** [Open an issue](https://github.com/yourusername/species-identifier/issues)
-- 💡 **Feature Requests:** [Start a discussion](https://github.com/yourusername/species-identifier/discussions)
-- 📧 **Email:** your.email@example.com
+- 🐛 **Bug Reports:** [Open an issue](https://github.com/helloivankorGit/species-identifier/issues)
+- 💡 **Feature Requests:** [Start a discussion](https://github.com/helloivankorGit/species-identifier/discussions)
+- 📧 **Email:** helloivankor@gmail.com
 
 ---
 
@@ -434,13 +435,6 @@ If you find this project helpful, please consider:
 
 ---
 
-## 🎉 Special Thanks
-
-Special recognition for Ukrainian language support and modern design implementation!
-
-**З Різдвом Христовим! Merry Christmas!** 🎄🇺🇦
-
----
 
 <p align="center">
   Made with ❤️ using React Native & Expo
